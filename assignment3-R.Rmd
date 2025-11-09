@@ -1,0 +1,104 @@
+```{r}
+
+#libraries were installed here which required rtools
+
+```
+
+
+
+
+
+```{r}
+
+#the directory was set to where the dataset csvs existed, code not shown for privacy
+#However, setwd("Path_to_dataset_csvs") was used
+
+
+library(data.table)
+library(ggplot2)
+
+
+film       <- fread("film.csv")
+language   <- fread("language.csv")
+customer   <- fread("customer.csv")
+store      <- fread("store.csv")
+payment    <- fread("payment.csv")
+rental     <- fread("rental.csv")
+inventory  <- fread("inventory.csv")
+staff      <- fread("staff.csv")
+
+```
+
+```{r}
+#task1
+select <- film[rating == "PG" & rental_duration > 5]
+select
+
+```
+
+
+
+```{r}
+
+#task2
+select <- film[, .(average_rental_rate = mean(rental_rate, na.rm = TRUE)), by = rating]
+select
+
+
+
+```
+
+
+```{r}
+
+#task3
+ss <- film[, .N, by = language_id][language, on = .(language_id), nomatch = 0]
+select <- ss[, .(language = name, total_films = N)]
+select
+
+
+```
+
+```{r}
+
+#task 4
+ss <- customer[, .(customer_id, customer_name = paste(first_name, last_name), store_id)]
+select <- ss[store, on = .(store_id), nomatch = 0][, .(customer_name, store_id)]
+select
+
+
+```
+
+```{r}
+#task 5
+select <- payment[staff, on = .(staff_id),.(payment_id, amount, payment_date,staff_member = paste(i.first_name, i.last_name))]
+select
+
+
+
+```
+
+```{r}
+#task 6
+rented_films <- unique(inventory[rental, on = .(inventory_id), film_id])
+select <- film[!film_id %in% rented_films]
+select
+
+
+```
+
+```{r}
+#task 7
+film_count <- film[, .N, by = rating]
+ggplot(film_count, aes(x = rating, y = N, fill = rating)) +
+geom_bar(stat = "identity") +
+labs(title = "Number of Films by Rating",
+x = "Film Rating",
+y = "Film Count") +
+theme_minimal()
+
+
+
+```
+
+
